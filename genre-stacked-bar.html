@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Stacked Bar Chart for Song Genres by Year</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 30px;
+      background: #fafafa;
+    }
+    svg {
+      border: 1px solid #ddd;
+    }
+    .axis path,
+    .axis line {
+      stroke: #ccc;
+    }
+    .legend rect {
+      stroke: #fff;
+      stroke-width: 1px;
+    }
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #ddd;
+      padding: 6px;
+      font-size: 13px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <h2>Genre Popularity by Year (1980-2020)</h2>
+  <body>Number of songs from each genre in the Top 10 Billboard Hits from that year</body>
+  <svg width="1000" height="600"></svg>
+  <div class="tooltip"></div>
+
+  <script>
+    const data = [
+      { year: "1980", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 1, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 3, "R&B": 1, Rap: 0, Rock: 4 },
+      { year: "1981", "Country Pop": 2,  "Hip Hop": 0, "Latin Pop": 0, Pop: 0, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 6, "R&B": 1, Rap: 0, Rock: 0 },
+      { year: "1982", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 2, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 5, "R&B": 1, Rap: 0, Rock: 2 },
+      { year: "1983", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 4, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 4, "R&B": 0, Rap: 0, Rock: 1 },
+      { year: "1984", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 3, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 2, "R&B": 3, Rap: 0, Rock: 2 },
+      { year: "1985", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 3, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 3, "R&B": 2, Rap: 0, Rock: 1 },
+      { year: "1986", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 3, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 3, "R&B": 2, Rap: 0, Rock: 1 },
+      { year: "1987", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 3, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 4, "R&B": 0, Rap: 0, Rock: 3 },
+      { year: "1988", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 4, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 3, "R&B": 0, Rap: 0, Rock: 2 },
+      { year: "1989", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 5, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 2, "R&B": 1, Rap: 0, Rock: 1 },
+      { year: "1990", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 2, "Pop Ballad": 2, "Pop Rap": 0, "Pop Rock": 2, "R&B": 2, Rap: 0, Rock: 2 },
+      { year: "1991", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 4, "Pop Ballad": 2, "Pop Rap": 0, "Pop Rock": 1, "R&B": 2, Rap: 0, Rock: 1 },
+      { year: "1992", "Country Pop": 0,  "Hip Hop": 2, "Latin Pop": 0, Pop: 1, "Pop Ballad": 2, "Pop Rap": 0, "Pop Rock": 0, "R&B": 4, Rap: 0, Rock: 1 },
+      { year: "1993", "Country Pop": 0,  "Hip Hop": 2, "Latin Pop": 0, Pop: 2, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 0, "R&B": 5, Rap: 0, Rock: 0 },
+      { year: "1994", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 3, "Pop Ballad": 3, "Pop Rap": 0, "Pop Rock": 2, "R&B": 2, Rap: 0, Rock: 0 },
+      { year: "1995", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 0, Pop: 5, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 0, "R&B": 4, Rap: 0, Rock: 0 },
+      { year: "1996", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 1, Pop: 3, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 1, "R&B": 3, Rap: 0, Rock: 0 },
+      { year: "1997", "Country Pop": 1,  "Hip Hop": 2, "Latin Pop": 0, Pop: 2, "Pop Ballad": 4, "Pop Rap": 0, "Pop Rock": 0, "R&B": 1, Rap: 0, Rock: 0 },
+      { year: "1998", "Country Pop": 2,  "Hip Hop": 0, "Latin Pop": 0, Pop: 2, "Pop Ballad": 2, "Pop Rap": 0, "Pop Rock": 1, "R&B": 3, Rap: 0, Rock: 0 },
+      { year: "1999", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 1, Pop: 5, "Pop Ballad": 3, "Pop Rap": 0, "Pop Rock": 1, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2000", "Country Pop": 2,  "Hip Hop": 0, "Latin Pop": 2, Pop: 2, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 2, "R&B": 1, Rap: 0, Rock: 0 },
+      { year: "2001", "Country Pop": 0,  "Hip Hop": 2, "Latin Pop": 0, Pop: 3, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 3, "R&B": 1, Rap: 0, Rock: 1 },
+      { year: "2002", "Country Pop": 0,  "Hip Hop": 2, "Latin Pop": 0, Pop: 1, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 1, "R&B": 3, Rap: 0, Rock: 3 },
+      { year: "2003", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 0, Pop: 3, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 2, "R&B": 1, Rap: 1, Rock: 2 },
+      { year: "2004", "Country Pop": 0,  "Hip Hop": 3, "Latin Pop": 0, Pop: 3, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 1, "R&B": 3, Rap: 0, Rock: 0 },
+      { year: "2005", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 0, Pop: 2, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 2, "R&B": 2, Rap: 1, Rock: 1 },
+      { year: "2006", "Country Pop": 0,  "Hip Hop": 4, "Latin Pop": 1, Pop: 3, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 0, "R&B": 1, Rap: 0, Rock: 0 },
+      { year: "2007", "Country Pop": 1,  "Hip Hop": 3, "Latin Pop": 0, Pop: 6, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 0, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2008", "Country Pop": 0,  "Hip Hop": 2, "Latin Pop": 0, Pop: 0, "Pop Ballad": 3, "Pop Rap": 0, "Pop Rock": 1, "R&B": 4, Rap: 0, Rock: 0 },
+      { year: "2009", "Country Pop": 1,  "Hip Hop": 2, "Latin Pop": 0, Pop: 5, "Pop Ballad": 0, "Pop Rap": 0, "Pop Rock": 1, "R&B": 0, Rap: 1, Rock: 0 },
+      { year: "2010", "Country Pop": 1,  "Hip Hop": 0, "Latin Pop": 0, Pop: 7, "Pop Ballad": 0, "Pop Rap": 2, "Pop Rock": 0, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2011", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 7, "Pop Ballad": 1, "Pop Rap": 1, "Pop Rock": 0, "R&B": 1, Rap: 0, Rock: 0 },
+      { year: "2012", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 9, "Pop Ballad": 0, "Pop Rap": 1, "Pop Rock": 0, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2013", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 0, Pop: 3, "Pop Ballad": 2, "Pop Rap": 3, "Pop Rock": 1, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2014", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 0, Pop: 4, "Pop Ballad": 2, "Pop Rap": 2, "Pop Rock": 1, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2015", "Country Pop": 0,  "Hip Hop": 3, "Latin Pop": 0, Pop: 3, "Pop Ballad": 2, "Pop Rap": 0, "Pop Rock": 1, "R&B": 1, Rap: 0, Rock: 0 },
+      { year: "2016", "Country Pop": 0,  "Hip Hop": 1, "Latin Pop": 0, Pop: 7, "Pop Ballad": 1, "Pop Rap": 0, "Pop Rock": 1, "R&B": 0, Rap: 0, Rock: 0 },
+      { year: "2017", "Country Pop": 1,  "Hip Hop": 1, "Latin Pop": 1, Pop: 3, "Pop Ballad": 0, "Pop Rap": 1, "Pop Rock": 1, "R&B": 0, Rap: 2, Rock: 0 },
+      { year: "2018", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 1, Pop: 3, "Pop Ballad": 1, "Pop Rap": 4, "Pop Rock": 0, "R&B": 0, Rap: 1, Rock: 0 },
+      { year: "2019", "Country Pop": 0,  "Hip Hop": 0, "Latin Pop": 0, Pop: 6, "Pop Ballad": 0, "Pop Rap": 3, "Pop Rock": 0, "R&B": 0, Rap: 1, Rock: 0 },
+      { year: "2020", "Country Pop": 1,  "Hip Hop": 0, "Latin Pop": 0, Pop: 5, "Pop Ballad": 1, "Pop Rap": 2, "Pop Rock": 0, "R&B": 0, Rap: 1, Rock: 0 }
+    ];
+
+    const keys = ["Rock", "Pop Rock", "Pop", "Pop Ballad", "Country Pop", "Latin Pop", "Pop Rap", "Rap", "Hip Hop", "R&B"];
+
+    const svg = d3.select("svg");
+    const margin = { top: 50, right: 200, bottom: 80, left: 70 };
+    const width = +svg.attr("width") - margin.left - margin.right;
+    const height = +svg.attr("height") - margin.top - margin.bottom;
+
+    const chart = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const color = d3.scaleOrdinal()
+        .domain(keys)
+        .range([
+            "#7ce2ad",  
+            "#7cc6c6",  
+            "#7ca8da",  
+            "#808be9",  
+            "#a689dd",  
+            "#c784d0",  
+            "#e77dc3",  
+            "#eb9ab3",  
+            "#ecb79f",  
+            "#ebd385"  
+        ]);
+
+    const stackedData = d3.stack().keys(keys)(data);
+
+    const x = d3.scaleBand()
+      .domain(data.map(d => d.year))
+      .range([0, width])
+      .padding(0.2);
+
+    const y = d3.scaleLinear()
+      .domain([0, d3.max(stackedData[stackedData.length - 1], d => d[1])])
+      .nice()
+      .range([height, 0]);
+
+    chart.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(x).tickValues(x.domain().filter((d, i) => !(i % 5))))
+      .selectAll("text")
+      .attr("transform", "rotate(-45)")
+      .style("text-anchor", "end");
+
+    chart.append("g")
+      .call(d3.axisLeft(y));
+
+    const tooltip = d3.select(".tooltip");
+
+    const groups = chart.selectAll("g.layer")
+      .data(stackedData)
+      .join("g")
+      .attr("class", "layer")
+      .attr("fill", d => color(d.key));
+
+    groups.selectAll("rect")
+      .data(d => d)
+      .join("rect")
+      .attr("x", d => x(d.data.year))
+      .attr("y", d => y(d[1]))
+      .attr("height", d => y(d[0]) - y(d[1]))
+      .attr("width", x.bandwidth())
+      .on("mousemove", (event, d) => {
+        const genre = d3.select(event.currentTarget.parentNode).datum().key;
+        const count = d.data[genre];
+        tooltip.style("opacity", 1)
+          .html(`<strong>Year:</strong> ${d.data.year}<br/><strong>Genre:</strong> ${genre}<br/><strong>Count:</strong> ${count}`)
+          .style("left", (event.pageX + 10) + "px")
+          .style("top", (event.pageY - 28) + "px");
+      })
+      .on("mouseout", () => tooltip.style("opacity", 0));
+
+    
+    const legend = svg.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${width + margin.left + 20},${margin.top})`);
+
+    keys.forEach((key, i) => {
+      const legendRow = legend.append("g")
+        .attr("transform", `translate(0,${i * 20})`);
+
+      legendRow.append("rect")
+        .attr("width", 18)
+        .attr("height", 18)
+        .attr("fill", color(key));
+
+      legendRow.append("text")
+        .attr("x", 24)
+        .attr("y", 14)
+        .text(key);
+    });
+
+  </script>
+</body>
+</html>
