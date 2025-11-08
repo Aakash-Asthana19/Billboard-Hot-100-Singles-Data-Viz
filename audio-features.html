@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Audio Features Chart</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  body { font-family: sans-serif; display: flex; justify-content: center; margin-top: 50px; }
+  .axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges; }
+  .area { opacity: 0.6; }
+  .container { display: flex; align-items: flex-start; justify-content: center; gap: 40px; }
+  .checkbox-container { display: flex; flex-direction: column; justify-content: flex-start; }
+  svg { border: 1px solid #ccc; }
+
+  /* Slider styles */
+  .slider-container { width: 400px; margin-bottom: 20px; position: relative; height: 10px; }
+  .slider-track { height: 6px; background: #ddd; position: absolute; width: 100%; top: 50%; transform: translateY(-50%); border-radius: 3px; }
+  .slider-range { position: absolute; height: 100%; background: steelblue; border-radius: 3px; top: 0; }
+  .handle { width: 20px; height: 20px; background: steelblue; border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); cursor: pointer; }
+  .handle:hover { background: #1e90ff; }
+  .tooltip { position: absolute; background: #333; color: #fff; padding: 3px 6px; border-radius: 3px; font-size: 12px; pointer-events: none; text-align: center; }
+
+  .dot { fill: rgb(0, 0, 0); stroke: #fff; stroke-width: 1px; cursor: pointer; }
+  #rangeLabel { text-align: center; font-weight: bold; margin-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div>
+    <p>Year Range:</p>
+    <div class="slider-container" id="slider">
+      <div class="slider-track"></div>
+      <div class="slider-range"></div>
+      <div class="handle" id="handleMin"></div>
+      <div class="handle" id="handleMax"></div>
+      <div class="tooltip" id="tooltipMin">1980</div>
+      <div class="tooltip" id="tooltipMax">2020</div>
+    </div>
+    <div id="rangeLabel">1980 - 2020</div>
+    <svg width="900" height="500"></svg>
+    <div class="tooltip" id="tooltipHover" style="opacity:0;"></div>
+  </div>
+  <div class="checkbox-container">
+    <label><input type="radio" name="category" class="category" value="danceability" checked> Danceability</label>
+    <label><input type="radio" name="category" class="category" value="energy"> Energy</label>
+    <label><input type="radio" name="category" class="category" value="tempo"> Tempo</label>
+    <label><input type="radio" name="category" class="category" value="acousticness"> Acousticness</label>
+    <label><input type="radio" name="category" class="category" value="duration_ms"> Duration</label>
+  </div>
+</div>
+
+<script>
+
+const data = [
+  {year:1980,danceability:0.620,energy:0.571,tempo:103.130,acousticness:0.356,duration_ms:207390},
+  {year:1981,danceability:0.630,energy:0.649,tempo:123.569,acousticness:0.304,duration_ms:227191},
+  {year:1982,danceability:0.668,energy:0.629,tempo:120.588,acousticness:0.141,duration_ms:235502},
+  {year:1983,danceability:0.697,energy:0.593,tempo:122.858,acousticness:0.139,duration_ms:252009},
+  {year:1984,danceability:0.651,energy:0.691,tempo:116.194,acousticness:0.176,duration_ms:249788},
+  {year:1985,danceability:0.663,energy:0.656,tempo:107.884,acousticness:0.173,duration_ms:279528},
+  {year:1986,danceability:0.625,energy:0.570,tempo:112.360,acousticness:0.209,duration_ms:272095},
+  {year:1987,danceability:0.625,energy:0.792,tempo:108.949,acousticness:0.226,duration_ms:263893},
+  {year:1988,danceability:0.622,energy:0.705,tempo:121.720,acousticness:0.227,duration_ms:260760},
+  {year:1989,danceability:0.679,energy:0.668,tempo:110.760,acousticness:0.271,duration_ms:253647},
+  {year:1990,danceability:0.649,energy:0.606,tempo:115.785,acousticness:0.286,duration_ms:277173},
+  {year:1991,danceability:0.621,energy:0.555,tempo:115.620,acousticness:0.196,duration_ms:273140},
+  {year:1992,danceability:0.707,energy:0.568,tempo:113.428,acousticness:0.175,duration_ms:270712},
+  {year:1993,danceability:0.706,energy:0.566,tempo:109.532,acousticness:0.253,duration_ms:269637},
+  {year:1994,danceability:0.640,energy:0.562,tempo:113.855,acousticness:0.249,duration_ms:243978},
+  {year:1995,danceability:0.687,energy:0.570,tempo:120.888,acousticness:0.230,duration_ms:270767},
+  {year:1996,danceability:0.643,energy:0.479,tempo:129.628,acousticness:0.432,duration_ms:262663},
+  {year:1997,danceability:0.706,energy:0.622,tempo:105.768,acousticness:0.167,duration_ms:258585},
+  {year:1998,danceability:0.641,energy:0.499,tempo:131.300,acousticness:0.214,duration_ms:273190},
+  {year:1999,danceability:0.654,energy:0.655,tempo:123.767,acousticness:0.181,duration_ms:231018},
+  {year:2000,danceability:0.645,energy:0.649,tempo:112.342,acousticness:0.159,duration_ms:260767},
+  {year:2001,danceability:0.632,energy:0.693,tempo:99.549,acousticness:0.172,duration_ms:232442},
+  {year:2002,danceability:0.655,energy:0.731,tempo:122.503,acousticness:0.120,duration_ms:245053},
+  {year:2003,danceability:0.651,energy:0.759,tempo:95.572,acousticness:0.142,duration_ms:226088},
+  {year:2004,danceability:0.738,energy:0.684,tempo:103.611,acousticness:0.158,duration_ms:230300},
+  {year:2005,danceability:0.713,energy:0.650,tempo:121.201,acousticness:0.142,duration_ms:220696},
+  {year:2006,danceability:0.778,energy:0.698,tempo:123.144,acousticness:0.191,duration_ms:232418},
+  {year:2007,danceability:0.631,energy:0.679,tempo:138.635,acousticness:0.238,duration_ms:237920},
+  {year:2008,danceability:0.690,energy:0.561,tempo:112.681,acousticness:0.309,duration_ms:231876},
+  {year:2009,danceability:0.713,energy:0.693,tempo:128.154,acousticness:0.128,duration_ms:224747},
+  {year:2010,danceability:0.707,energy:0.826,tempo:109.248,acousticness:0.121,duration_ms:238075},
+  {year:2011,danceability:0.689,energy:0.771,tempo:121.964,acousticness:0.124,duration_ms:224520},
+  {year:2012,danceability:0.682,energy:0.707,tempo:128.416,acousticness:0.094,duration_ms:217835},
+  {year:2013,danceability:0.597,energy:0.684,tempo:123.647,acousticness:0.187,duration_ms:253207},
+  {year:2014,danceability:0.630,energy:0.656,tempo:124.885,acousticness:0.240,duration_ms:219400},
+  {year:2015,danceability:0.723,energy:0.669,tempo:111.208,acousticness:0.161,duration_ms:227923},
+  {year:2016,danceability:0.654,energy:0.632,tempo:130.298,acousticness:0.187,duration_ms:227330},
+  {year:2017,danceability:0.769,energy:0.666,tempo:126.141,acousticness:0.184,duration_ms:225174},
+  {year:2018,danceability:0.709,energy:0.664,tempo:120.574,acousticness:0.084,duration_ms:216595},
+  {year:2019,danceability:0.778,energy:0.576,tempo:127.334,acousticness:0.217,duration_ms:209586},
+  {year:2020,danceability:0.705,energy:0.626,tempo:116.776,acousticness:0.253,duration_ms:200920}
+];
+
+// SVG setup
+const svg = d3.select("svg"),
+      margin = {top: 20, right: 30, bottom: 50, left: 60},
+      width = +svg.attr("width") - margin.left - margin.right,
+      height = +svg.attr("height") - margin.top - margin.bottom;
+
+const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+let x = d3.scaleLinear().range([0, width]);
+let y = d3.scaleLinear().range([height, 0]);
+
+let xAxis = g.append("g").attr("transform", `translate(0,${height})`);
+let yAxis = g.append("g");
+
+// Custom colors for each feature
+const featureColors = {
+    danceability: "pink",
+    energy: "red",
+    tempo: "blue",
+    acousticness: "green",
+    duration_ms: "purple"
+};
+
+// Slider setup (unchanged)
+let yearStart = 1980;
+let yearEnd = 2020;
+const slider = d3.select("#slider");
+const handleMin = d3.select("#handleMin");
+const handleMax = d3.select("#handleMax");
+const rangeTrack = d3.select(".slider-range");
+const tooltipMin = d3.select("#tooltipMin");
+const tooltipMax = d3.select("#tooltipMax");
+const tooltipHover = d3.select("#tooltipHover");
+const sliderWidth = parseInt(slider.style("width"));
+const minYear = 1980;
+const maxYear = 2020;
+const minGap = 10;
+function yearToX(year) { return ((year - minYear) / (maxYear - minYear)) * sliderWidth; }
+function xToYear(x) { return Math.round(minYear + (x/sliderWidth)*(maxYear - minYear)); }
+
+function updateSlider() {
+    handleMin.style("left", yearToX(yearStart)+"px");
+    handleMax.style("left", yearToX(yearEnd)+"px");
+    rangeTrack.style("left", yearToX(yearStart)+"px").style("width", yearToX(yearEnd)-yearToX(yearStart)+"px");
+
+    tooltipMin.style("left", yearToX(yearStart)+"px").text(yearStart);
+    tooltipMax.style("left", yearToX(yearEnd)+"px").text(yearEnd);
+
+    document.getElementById("rangeLabel").textContent = `${yearStart} - ${yearEnd}`;
+    updateChart();
+}
+
+const dragMin = d3.drag()
+    .on("drag", function(event) {
+        let xPos = Math.min(event.x, yearToX(yearEnd - minGap));
+        xPos = Math.max(0, xPos);
+        yearStart = xToYear(xPos);
+        updateSlider();
+    });
+
+const dragMax = d3.drag()
+    .on("drag", function(event) {
+        let xPos = Math.max(event.x, yearToX(yearStart + minGap));
+        xPos = Math.min(sliderWidth, xPos);
+        yearEnd = xToYear(xPos);
+        updateSlider();
+    });
+
+handleMin.call(dragMin);
+handleMax.call(dragMax);
+
+// Chart update
+function updateChart() {
+    let checked = [document.querySelector(".category:checked").value];
+    x.domain([yearStart, yearEnd]);
+    let filteredData = data.filter(d => d.year >= yearStart && d.year <= yearEnd);
+
+    let yMin = d3.min(filteredData, d => d[checked[0]]);
+    let yMax = d3.max(filteredData, d => d[checked[0]]);
+    y.domain([yMin*0.95, yMax*1.05]);
+
+    xAxis.transition().duration(300).call(d3.axisBottom(x).tickFormat(d3.format("d")));
+    yAxis.transition().duration(300).call(d3.axisLeft(y));
+
+    g.selectAll(".area").remove();
+    g.selectAll(".dot").remove();
+
+    let area = d3.area()
+        .x(d => x(d.year))
+        .y0(height)
+        .y1(d => y(d[checked[0]]));
+
+    g.append("path")
+        .datum(filteredData)
+        .attr("class","area")
+        .attr("fill", featureColors[checked[0]])
+        .attr("d", area);
+
+    // Draw points
+    g.selectAll(".dot")
+      .data(filteredData)
+      .enter()
+      .append("circle")
+      .attr("class","dot")
+      .attr("cx", d => x(d.year))
+      .attr("cy", d => y(d[checked[0]]))
+      .attr("r", 5)
+      .on("mouseover", function(event,d){
+        tooltipHover.transition().duration(100).style("opacity",0.9);
+        let value;
+        if (["danceability","energy","acousticness"].includes(checked[0])){
+            value = d[checked[0]].toFixed(3);
+        } else {
+            value = Math.round(d[checked[0]]);
+        }
+        tooltipHover.html(`Year: ${d.year}<br>${checked[0]}: ${value}`)
+            .style("left",(event.pageX+10)+"px")
+            .style("top",(event.pageY-28)+"px");
+      })
+      .on("mousemove", function(event){
+          tooltipHover.style("left",(event.pageX+10)+"px")
+                      .style("top",(event.pageY-28)+"px");
+      })
+      .on("mouseout", function(){
+          tooltipHover.transition().duration(100).style("opacity",0);
+      });
+}
+
+d3.selectAll(".category").on("change", updateChart);
+
+updateSlider();
+</script>
+
+</body>
+</html>
