@@ -813,9 +813,9 @@ function buildGenreControls(selectedSet){
   row.append("span").attr("class","swatch").style("background", d=> color(d));
   row.append("span").text(d=> d);
 
-  if (selectedSet.size === 0) {
-    wrap.append("div").attr("class","empty-note").text("No genres selected. Choose at least one to plot.");
-  }
+  // if (selectedSet.size === 0) {
+  //   wrap.append("div").attr("class","empty-note").text("No genres selected. Choose at least one to plot.");
+  // }
 }
 
 function buildFeatureSlider(start=1980, end=2020, onChange){
