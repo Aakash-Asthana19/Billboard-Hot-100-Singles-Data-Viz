@@ -97,6 +97,38 @@
     position: relative;
     top: -6%;
   }
+  /* Chart typography */
+  #center-rect svg text {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  /* Title + axis labels */
+  .chart-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    fill: #f9fafb;
+  }
+
+  .x-axis-label,
+  .y-axis-label {
+    font-size: 12px;
+    fill: #cbd5f5;
+    opacity: 0.9;
+  }
+
+  /* Tick labels */
+  #center-rect svg g.tick text {
+    font-size: 11px;
+    fill: #9ca9d9;
+  }
+
+  /* Axis lines */
+  #center-rect svg .domain,
+  #center-rect svg .tick line {
+    stroke: #1f2a4d;
+    stroke-width: 1;
+  }
 </style>
 </head>
 
@@ -1382,15 +1414,53 @@ function renderGenre(selectedKeys){
       .call(d3.axisBottom(x).tickValues(x.domain().filter((d,i)=>!(i%5))));
     g.append("g").call(d3.axisLeft(y));
   }
+  // Axis titles + Chart title
+  g.append("text")
+    .attr("class","x-axis-label")
+    .attr("x", width / 2)
+    .attr("y", height + 44)
+    .attr("text-anchor","middle")
+    .style("fill","#e8edf7")
+    .style("font-size","16px")
+    .text("Year");
+
+  g.append("text")
+    .attr("class","y-axis-label")
+    .attr("transform","rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -35)
+    .attr("text-anchor","middle")
+    .style("fill","#e8edf7")
+    .style("font-size","16px")
+    .text("Number of Songs in Top 10");
+
+  g.append("text")
+    .attr("class","chart-title")
+    .attr("x", width / 2)
+    .attr("y", -18)
+    .attr("text-anchor","middle")
+    .style("fill","#e8edf7")
+    .style("font-size","16px")
+    .text("Top-10 Genre Mix By Year");
 }
 
 function renderFeatureRange(feature="tempo", startYear=1980, endYear=2020){
   clearChart();
-  const data = audioData.filter(d=> d.year >= startYear && d.year <= endYear);
+  //const data = audioData.filter(d=> d.year >= startYear && d.year <= endYear);
+  let data = audioData
+  .filter(d => d.year >= startYear && d.year <= endYear)
+  .map(d => ({
+    ...d,
+    duration_sec: d.duration_ms / 1000   // <-- Convert here
+  }));
 
   const x = d3.scaleLinear().domain([startYear,endYear]).range([0,width]);
-  const yMin = d3.min(data, d=> d[feature]);
-  const yMax = d3.max(data, d=> d[feature]);
+  
+  const rawFeature = (feature === "duration_ms") ? "duration_sec" : feature;
+  const yMin = d3.min(data, d => d[rawFeature]);
+  const yMax = d3.max(data, d => d[rawFeature]);
+  //const yMin = d3.min(data, d=> d[feature]);
+  //const yMax = d3.max(data, d=> d[feature]);
   let padMin = yMin*0.95, padMax = yMax*1.05;
   if (["danceability","energy","acousticness"].includes(feature)){
     padMin = Math.max(0,yMin-0.05);
@@ -1402,10 +1472,46 @@ function renderFeatureRange(feature="tempo", startYear=1980, endYear=2020){
     .call(d3.axisBottom(x).tickFormat(d3.format("d")));
   g.append("g").call(d3.axisLeft(y));
 
+  // Axis Titles + Chart title
+  const labelKey = feature === "duration_ms" ? "durationms" : feature;
+  const baseLabel = featureLabel[labelKey] || feature;
+
+  let yLabel = baseLabel;
+  if (feature === "tempo")       yLabel = "Tempo (BPM)";
+  if (feature === "duration_ms") yLabel = "Duration (s)";
+
+  g.append("text")
+    .attr("class","x-axis-label")
+    .attr("x", width / 2)
+    .attr("y", height + 44)
+    .attr("text-anchor","middle")
+    .style("fill","#e8edf7")
+    .style("font-size","16px")
+    .text("Year");
+
+  g.append("text")
+    .attr("class","y-axis-label")
+    .attr("transform","rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", -35)
+    .attr("text-anchor","middle")
+    .style("fill","#e8edf7")
+    .style("font-size","16px")
+    .text(yLabel);
+
+  g.append("text")
+    .attr("class","chart-title")
+    .attr("x", width / 2)
+    .attr("y", -18)
+    .attr("text-anchor","middle")
+    .style("fill","#e8edf7")
+    .style("font-size","16px")
+    .text(`Average ${baseLabel} of Top-10 Songs By Year`);
+
   const area = d3.area()
     .x(d=>x(d.year))
     .y0(height)
-    .y1(d=>y(d[feature]))
+    .y1(d=>y(d[rawFeature]))
     .curve(d3.curveMonotoneX);
 
   g.append("path")
@@ -1420,7 +1526,7 @@ function renderFeatureRange(feature="tempo", startYear=1980, endYear=2020){
     .append("circle")
     .attr("class","dot")
     .attr("cx",d=>x(d.year))
-    .attr("cy",d=>y(d[feature]))
+    .attr("cy",d=>y(d[rawFeature]))
     .attr("r",4)
     .attr("fill","#000")
     .attr("stroke","#fff")
