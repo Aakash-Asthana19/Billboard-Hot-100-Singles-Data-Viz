@@ -779,24 +779,24 @@ let songsByYear = new Map(Object.entries(songsByYearData).map(([y, arr]) => [Num
 let songsReady = true;
 
 // ============ shared helpers for feature tooltip ============
-const featureCsvKey = f => (f === 'durationms' ? 'duration_ms' : f);
+//const featureCsvKey = f => (f === 'durationms' ? 'duration_ms' : f);
+const featureCsvKey = f => f;
 
 const featureLabel = {
   tempo: 'Tempo',
   danceability: 'Danceability',
   energy: 'Energy',
   acousticness: 'Acousticness',
-  durationms: 'Duration'
+  durationms: 'Duration',
+  duration_ms: 'duration_s'
 };
 
 function formatFeatureValue(feature, value) {
   if (value == null || Number.isNaN(value)) return '—';
   if (feature === 'tempo') return `${Math.round(value)} BPM`;
-  if (feature === 'durationms') {
-    const secs = Math.round(value / 1000);
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+    if (feature === 'duration_ms') {
+    const secs = value / 1000;
+    return `${secs.toFixed(1)} s`;   // e.g., "207.4 s"
   }
   return Number(value).toFixed(3);
 }
