@@ -825,6 +825,30 @@ function buildTooltipHtml(year, feature, avgValue, songs) {
   `;
 }
 
+function setChartTitle(text){
+  g.selectAll(".chart-title").remove();
+  g.append("text")
+    .attr("class","chart-title")
+    .attr("x", width / 2)
+    .attr("y", -10)
+    .attr("text-anchor","middle")
+    .style("font-size","20px")
+    .text(text);
+}
+
+function prettyMetricName(k){
+  const map = {
+    genre: "Genre Share",
+    tempo: "Tempo",
+    danceability: "Danceability",
+    energy: "Energy",
+    acousticness: "Acousticness",
+    duration_ms: "Duration"
+  };
+  return map[k] || k;
+}
+
+
 // ================= CHART SETUP =================
 const svg = d3.select("#mainChart");
 const margin = {top:20,right:20,bottom:40,left:55};
@@ -855,6 +879,7 @@ const featureColors = {
   acousticness:"#22c55e",
   duration_ms:"#a855f7"
 };
+
 
 // ================= RIGHT-SIDE UI BUILDERS =================
 function buildGenreControls(selectedSet){
@@ -1347,17 +1372,32 @@ function renderFeatureBoxplotsForDecades(decades, feature){
 }
 
 // wrapper for decade comparison view
+// function showDecadeComparison(){
+//   linkedState.activeGenre = linkedState.activeGenre || null;
+//   buildDecadeMetricPanel(({decades, metric})=>{
+//     if (metric === "genre"){
+//       renderGenrePiesForDecades(decades, allGenreKeys);
+//     } else {
+//       renderFeatureBoxplotsForDecades(decades, metric);
+//     }
+//   });
+// }
+
 function showDecadeComparison(){
   linkedState.activeGenre = linkedState.activeGenre || null;
+
   buildDecadeMetricPanel(({decades, metric})=>{
+    // Render first (renderers call clearChart), then set title
     if (metric === "genre"){
       renderGenrePiesForDecades(decades, allGenreKeys);
     } else {
       renderFeatureBoxplotsForDecades(decades, metric);
     }
+
+    const titleMetric = prettyMetricName(metric);
+    setChartTitle(`Decade Comparison — ${titleMetric}`);
   });
 }
-
 // ================= NON-DECADE RENDERERS =================
 function renderGenre(selectedKeys){
   clearChart();
