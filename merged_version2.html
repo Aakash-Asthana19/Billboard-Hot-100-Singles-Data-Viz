@@ -1021,12 +1021,14 @@ function getFeatureSamplesForDecade(feature, decLabel, {preferPerSong=true} = {}
   const out = [];
 
   const songsObj = (typeof songsByYearData !== "undefined") ? songsByYearData : null;
+  const convert = v => feature === "duration_ms" ? v / 1000 : v;  // <-- ms → s
 
   if (preferPerSong && songsObj){
     for (const y of years){
       const arr = songsObj[String(y)] || songsObj[y] || [];
       for (const row of arr){
-        const v = Number(row?.[feature]);
+        const raw = Number(row?.[feature]);
+        const v   = convert(raw);
         if (Number.isFinite(v) && v !== 0) out.push(v);
       }
     }
@@ -1366,7 +1368,7 @@ function renderFeatureBoxplotsForDecades(decades, feature){
     .attr("x",-height/2).attr("y",-40)
     .attr("text-anchor","middle")
     .style("fill","#e8edf7")
-    .text(feature==="duration_ms" ? "Duration (ms)" : feature);
+    .text(feature==="duration_ms" ? "Duration (s)" : feature);
 
   syncAllStatLabels();
 }
