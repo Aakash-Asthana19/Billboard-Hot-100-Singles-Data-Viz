@@ -69,19 +69,21 @@ body {
 #right-circle { right: 3%; top: 60%; transform: translateY(-20%); }
 
 .circle-card {
-  width: 80%;
-  height: 80%;
-  background: #2D2C5E;
-  border: 1px solid #2D2C5E;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  display: grid; place-items: center;
-  padding: 8px;
+  display: grid;
+  place-items: center;
+  padding: 0;             /* we’ll scale inner content with transform */
   text-align: center;
+  position: relative;      /* for absolute child scaling */
+  overflow: hidden;
 }
+
 
 /* left content */
 #leftContent { width: 95%; color:#e8edf7; font-size: 10px; }
-#leftContent h4 { margin: 4px 0 8px; font-size: 14px; }
+#leftContent h4 { font-size: 10px; }
 
 /* right content */
 #rightContent { width: 88%; color:#e8edf7; font-size: 13px; }
@@ -207,8 +209,13 @@ body {
       </div>
 
       <div id="left-circle" class="region">
-        <div class="circle-card"><div id="leftContent"></div></div>
+      <div class="circle-card">
+        <div class="circle-content-wrapper">
+          <div id="leftContent"></div>
+        </div>
       </div>
+    </div>
+
 
       <div id="right-circle" class="region">
         <div class="circle-card"><div id="rightContent"></div></div>
