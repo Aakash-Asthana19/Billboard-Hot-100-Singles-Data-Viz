@@ -8,8 +8,13 @@ The project lets you explore how **genre**, **tempo**, **danceability**, **energ
 
 ## Screenshots
 
-### 🏠 Home Page 
+### 🏠 Home Page
+
+Stacked Bar Chart:
 ![Home page](Images/Home_Page.png)
+
+Hover tooltip:
+![Home page hover](Images/Stacked_Bar_Chart_Tooltip.png)
 
 ### 📈 Feature Views (Example: Duration)
 Average duration of the Top‑10 songs by year, with tooltip showing the Top‑10 songs for the hovered year and their individual values.
