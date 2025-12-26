@@ -9,25 +9,25 @@ The project lets you explore how **genre**, **tempo**, **danceability**, **energ
 ## Demo Screenshots
 
 ### 🏠 Home Page 
-![Home page](Images/Home_Page.jpg)
+![Home page](Images/Home_Page.png)
 
 ### 📈 Feature Views (Example: Duration)
 Average duration of the Top‑10 songs by year, with tooltip showing the Top‑10 songs for the hovered year and their individual values.
 
 Line/area chart:
-![Duration line chart](Images/Duration-Line-Chart.jpg)
+![Duration line chart](Images/Duration_Line_Chart.png)
 
 Hover tooltip:
-![Duration hover](Images/Duration_Hover.jpg)
+![Duration hover](Images/Duration_Hover.png)
 
 
 ### 🕐 Decade Comparison Views
 
 Genre share by decade:
-![Decade comparison – genre](Images/Decade-Comparison-Genre.jpg)
+![Decade comparison – genre](Images/Decade_Comparison_Genre.png)
 
 Tempo distribution by decade:
-![Decade comparison – tempo](Images/Decade-Comparison-Tempo.jpg)
+![Decade comparison – tempo](Images/Decade_Comparison_Tempo.png)
 
 ---
 
