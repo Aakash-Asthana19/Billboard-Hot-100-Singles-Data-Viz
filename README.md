@@ -6,7 +6,7 @@ The project lets you explore how **genre**, **tempo**, **danceability**, **energ
 
 ---
 
-## Demo Screenshots
+## Screenshots
 
 ### 🏠 Home Page 
 ![Home page](Images/Home_Page.png)
